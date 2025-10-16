@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 
 from pathlib import Path
 from decouple import config
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,7 +27,7 @@ SECRET_KEY = config('secret_key')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('debug')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['zomato.fbadevishant.qzz.io', '34.45.48.89']
 
 
 # Application definition
@@ -59,7 +60,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'zomato.urls'
-import os
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -93,10 +94,23 @@ LOGIN_REDIRECT_URL = "/"
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
+from urllib.parse import urlparse, parse_qsl
+
+# Load .env variables
+DATABASE_URL = config("DATABASE_URL")
+
+# Parse the PostgreSQL URL
+tmpPostgres = urlparse(DATABASE_URL)
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': tmpPostgres.path.replace('/', ''),
+        'USER': tmpPostgres.username,
+        'PASSWORD': tmpPostgres.password,
+        'HOST': tmpPostgres.hostname,
+        'PORT': tmpPostgres.port or 5432,
+        'OPTIONS': dict(parse_qsl(tmpPostgres.query)),
     }
 }
 
